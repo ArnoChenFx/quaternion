@@ -783,3 +783,33 @@ def allclose(a, b, rtol=4*np.finfo(float).eps, atol=0.0, equal_nan=False, verbos
             i = tuple(i)
             print('\n    a[{0}]={1}\n    b[{0}]={2}'.format(i, a[i], b[i]))
     return result
+
+
+def from_axi_angel(axi, angle):
+    axi = np.array(axi, dtype=np.float64)
+    axi /= np.linalg.norm(axi)
+    q = np.zeros((4,),dtype=float64)
+    sinAng = np.sin(angle * 0.5)
+    q[:3] = axi * sinAng
+    q[3] = np.cos(angle * 0.5)
+    return as_quat_array(q)
+
+def from_two_vector(from_vec, to_vec):
+    v1 = np.array(from_vec, dtype=np.float64)
+    v2 = np.array(to_vec, dtype=np.float64)
+    v1_len = np.linalg.norm(v1)
+    v2_len = np.linalg.norm(v2)
+    v1 /= v1_len
+    v2 /= v2_len
+
+    v = np.cross(v1, v2)
+    q_w = np.sqrt(v1_len * v1_len * v2_len * v2_len) + np.dot(v1, v2)
+    q = np.quaternion(v[0], v[1], v[2], q_w)
+    return q.normalized()
+
+def as_matrix4x4(q):
+    mat = as_rotation_matrix(q)
+    mat = np.c_[mat, np.zeros(3)]
+    mat = np.r_[mat, np.zeros((1, 4))]
+    mat[3,3] = 1.0
+    return mat
