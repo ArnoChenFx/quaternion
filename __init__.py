@@ -790,9 +790,10 @@ def from_axi_angel(axi, angle):
     axi /= np.linalg.norm(axi)
     q = np.zeros((4,),dtype=float64)
     sinAng = np.sin(angle * 0.5)
-    q[:3] = axi * sinAng
-    q[3] = np.cos(angle * 0.5)
+    q[1:] = axi * sinAng
+    q[0] = np.cos(angle * 0.5)
     return as_quat_array(q)
+
 
 def from_two_vector(from_vec, to_vec):
     v1 = np.array(from_vec, dtype=np.float64)
@@ -804,8 +805,9 @@ def from_two_vector(from_vec, to_vec):
 
     v = np.cross(v1, v2)
     q_w = np.sqrt(v1_len * v1_len * v2_len * v2_len) + np.dot(v1, v2)
-    q = np.quaternion(v[0], v[1], v[2], q_w)
+    q = np.quaternion(q_w, v[0], v[1], v[2])
     return q.normalized()
+
 
 def as_matrix4x4(q):
     mat = as_rotation_matrix(q)
